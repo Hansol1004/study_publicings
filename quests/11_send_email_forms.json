@@ -1,0 +1,175 @@
+{
+  "name": "11_send_email_forms",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "d543839f-41f1-41ea-b3bd-cb416d12c58a",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -144,
+        0
+      ],
+      "id": "a21a789e-7982-4508-a045-42d15cc6b38a",
+      "name": "Webhook",
+      "webhookId": "d543839f-41f1-41ea-b3bd-cb416d12c58a"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "68699d09-dff9-41c1-8215-814724af3b52",
+              "name": "query",
+              "value": "={{ $json.query }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        176,
+        0
+      ],
+      "id": "d06a20e9-2443-45ff-a73e-1b43143990e1",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.adress}}\n\n",
+        "subject": "=test] 11_send_email_forms",
+        "message": "={{ $('Edit Fields').item.json.query }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        624,
+        0
+      ],
+      "id": "53a1ec1f-1c66-4f86-8c52-ac1093d3a2fe",
+      "name": "Send a message",
+      "webhookId": "cdc3f401-382c-455e-9049-1e2afbd94973",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "19uqg18MtGdK0o4l",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1s8TG7NplLeuntXExSiB2jCV2mVMlKS_4F2mfRulpqcY/edit?gid=0#gid=0",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "시트1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1s8TG7NplLeuntXExSiB2jCV2mVMlKS_4F2mfRulpqcY/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        352,
+        0
+      ],
+      "id": "91351fd3-1665-47a8-9d99-cefe6f42246c",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "yOwo83yhAi5Ulpym",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "192.168.0.143:5678",
+            "connection": "keep-alive",
+            "upgrade-insecure-requests": "1",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.6261.95 Safari/537.36",
+            "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+            "referer": "http://127.0.0.1:5500/quests/11_send_email_forms.html",
+            "accept-encoding": "gzip, deflate",
+            "accept-language": "en-US,en;q=0.9",
+            "if-none-match": "W/\"22-6OS7cK0FzqnV2NeDHdOSGS1bVUs\""
+          },
+          "params": {},
+          "query": {
+            "fname": "J",
+            "lname": "HS",
+            "gender": "male",
+            "content": "11_send_email_forms"
+          },
+          "body": {},
+          "webhookUrl": "http://localhost:5678/webhook-test/d543839f-41f1-41ea-b3bd-cb416d12c58a",
+          "executionMode": "test"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": -1,
+    "availableInMCP": false
+  },
+  "versionId": "a3245daa-8a89-4080-bd78-a25efa1e446d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f374bcaf97eaa22a4c48e9f88410138633a03fd3528943967a0d6632449c909e"
+  },
+  "id": "sdCxNZTq57tWUkSv",
+  "tags": []
+}
