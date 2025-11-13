@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>영상 리뷰 대시보드 프로토타입</title>
+    <style>
+        /* --- 0. Reset & Global Styles --- */
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #121212;
+            color: #E0E0E0;
+            font-size: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        /* --- 1. Layout (Requirement 1: Intuitive UI) --- */
+        .dashboard-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #1E1E1E; /* Content BG Color */
+            padding: 24px;
+            flex-shrink: 0;
+            height: 100%;
+            border-right: 1px solid #2A2A2A;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            padding: 24px;
+            overflow-y: auto; /* Allows content to scroll if table is too long */
+        }
+
+        /* --- 2. Sidebar (LNB) Styling --- */
+        .sidebar-logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #3399FF; /* Point Color */
+            margin-bottom: 32px;
+        }
+
+        .sidebar-nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar-nav li {
+            margin-bottom: 16px;
+        }
+
+        .sidebar-nav a {
+            text-decoration: none;
+            color: #E0E0E0; /* Default Text */
+            font-size: 1rem;
+            font-weight: 500;
+            padding: 8px 12px;
+            border-radius: 6px;
+            display: block;
+            transition: all 0.2s ease;
+        }
+
+        /* CSS Interaction Requirement: Sidebar Hover */
+        .sidebar-nav a:hover {
+            color: #3399FF; /* Point Color */
+            background-color: #2A2A2A;
+        }
+
+        .sidebar-nav a.active {
+            background-color: #3399FF;
+            color: #121212;
+            font-weight: 600;
+        }
+
+        /* --- 3. Main Content & Title --- */
+        .main-header {
+            margin-bottom: 24px;
+        }
+
+        .main-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #E0E0E0;
+            margin: 0;
+        }
+
+        /* --- 4. Table (Requirement 3: Data-dense Table) --- */
+        .data-table-container {
+            width: 100%;
+            background-color: #1E1E1E; /* Content BG */
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #2A2A2A;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid #2A2A2A;
+        }
+
+        .data-table th {
+            background-color: #121212;
+            color: #B0B0B0; /* Table Header Text */
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+        }
+
+        .data-table td {
+            color: #E0E0E0;
+            vertical-align: middle;
+        }
+
+        /* CSS Interaction Requirement: Table Row Hover */
+        .data-table tbody tr:hover {
+            background-color: #2A2A2A;
+            cursor: pointer;
+        }
+
+        /* --- 5. Table Content Styling --- */
+        .thumbnail {
+            width: 80px;
+            height: 45px;
+            background-color: #333;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            color: #888;
+        }
+
+        /* Requirement 3: Status Column Styling */
+        .status-badge {
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            display: inline-block;
+            min-width: 70px;
+            text-align: center;
+        }
+
+        .status-pending {
+            color: #FFD700;
+            background-color: rgba(255, 215, 0, 0.1);
+        }
+
+        .status-approved {
+            color: #28A745;
+            background-color: rgba(40, 167, 69, 0.1);
+        }
+
+        .status-rejected {
+            color: #DC3545;
+            background-color: rgba(220, 53, 69, 0.1);
+        }
+
+        /* Requirement 3 & Interaction: Action Buttons */
+        .action-button {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s ease;
+            margin-right: 8px;
+        }
+
+        .btn-approve {
+            background-color: #28A745;
+            color: white;
+        }
+        .btn-approve:hover {
+            background-color: #218838;
+        }
+
+        .btn-reject {
+            background-color: #DC3545;
+            color: white;
+        }
+        .btn-reject:hover {
+            background-color: #c82333;
+        }
+
+        .action-button:disabled {
+            background-color: #444;
+            color: #888;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        /* --- 6. Custom Modal (Replaces alert()) --- */
+        .modal-overlay {
+            display: none; /* Hidden by default */
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.6);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: #1E1E1E;
+            margin: auto;
+            padding: 24px;
+            border: 1px solid #2A2A2A;
+            width: 90%;
+            max-width: 400px;
+            border-radius: 8px;
+            color: #E0E0E0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+        
+        .modal-content h2 {
+            margin-top: 0;
+            color: #3399FF;
+        }
+
+        .modal-close {
+            background-color: #3399FF;
+            color: #121212;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            float: right;
+            margin-top: 20px;
+            transition: background-color 0.2s ease;
+        }
+        .modal-close:hover {
+            background-color: #55aaff;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- 1. Layout Container -->
+    <div class="dashboard-container">
+
+        <!-- 1a. Sidebar (LNB) -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">NeoStream</div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="#">대시보드</a></li>
+                    <li><a href="#" class="active">리뷰 대기</a></li>
+                    <li><a href="#">완료된 영상</a></li>
+                    <li><a href="#">설정</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- 1b. Main Content Area -->
+        <main class="main-content">
+            <header class="main-header">
+                <h1 class="main-title">리뷰 대기 영상 (3)</h1>
+            </header>
+
+            <!-- 3. Data Table -->
+            <div class="data-table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>상태</th>
+                            <th>썸네일</th>
+                            <th>영상 제목</th>
+                            <th>업로더</th>
+                            <th>요청일시</th>
+                            <th>액션</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr data-title="2025년 4분기 신규 캠페인">
+                            <td><span class="status-badge status-pending">Pending</span></td>
+                            <td><div class="thumbnail">80x45</div></td>
+                            <td>2025년 4분기 신규 캠페인</td>
+                            <td>PM팀</td>
+                            <td>2025-11-13 09:30</td>
+                            <td>
+                                <button class="action-button btn-approve" onclick="handleAction(event, '승인')">승인</button>
+                                <button class="action-button btn-reject" onclick="handleAction(event, '반려')">반려</button>
+                            </td>
+                        </tr>
+                        <tr data-title="신규 입사자 온보딩 영상 (수정)">
+                            <td><span class="status-badge status-pending">Pending</span></td>
+                            <td><div class="thumbnail">80x45</div></td>
+                            <td>신규 입사자 온보딩 영상 (수정)</td>
+                            <td>HR팀</td>
+                            <td>2025-11-13 09:15</td>
+                            <td>
+                                <button class="action-button btn-approve" onclick="handleAction(event, '승인')">승인</button>
+                                <button class="action-button btn-reject" onclick="handleAction(event, '반려')">반려</button>
+                            </td>
+                        </tr>
+                        <tr data-title="10월 베스트 콘텐츠 어워드">
+                            <td><span class="status-badge status-approved">Approved</span></td>
+                            <td><div class="thumbnail">80x45</div></td>
+                            <td>10월 베스트 콘텐츠 어워드</td>
+                            <td>운영팀</td>
+                            <td>2025-11-12 16:05</td>
+                            <td>
+                                <button class="action-button" disabled>승인</button>
+                                <button class="action-button" disabled>반려</button>
+                            </td>
+                        </tr>
+                        <!-- More rows can be added here -->
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- 6. Custom Modal (replaces alert) -->
+    <div id="customModal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 id="modalTitle">액션 확인</h2>
+            <p id="modalMessage">메시지가 여기에 표시됩니다.</p>
+            <button id="modalCloseButton" class="modal-close">닫기</button>
+        </div>
+    </div>
+
+    <script>
+        // Get modal elements
+        const modal = document.getElementById('customModal');
+        const modalMessage = document.getElementById('modalMessage');
+        const modalCloseButton = document.getElementById('modalCloseButton');
+
+        // Close modal when close button is clicked
+        modalCloseButton.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        // Close modal when clicking outside of it
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
+        /**
+         * JavaScript Interaction Requirement: Handle Button Click
+         * This function replaces the default alert() with a custom modal.
+         */
+        function handleAction(event, action) {
+            // Stop row click event from firing
+            event.stopPropagation(); 
+            
+            // Get the video title from the parent row's data-title attribute
+            const row = event.target.closest('tr');
+            const videoTitle = row.getAttribute('data-title');
+            
+            // Set modal content and display it
+            const message = `"${videoTitle}" 영상을 '${action}' 처리합니다.`;
+            modalMessage.textContent = message;
+            modal.style.display = "flex";
+        }
+
+    </script>
+
+</body>
+</html>
