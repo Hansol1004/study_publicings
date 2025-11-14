@@ -1,0 +1,23 @@
+div {
+    padding-top: 20px;
+    background-color: rgb(221, 221, 233);
+    text-align: left;
+}
+
+.first-background {
+    padding-top: 20px;
+    background-color: rgb(240, 83, 148);
+    text-align: left;
+}
+
+span {
+    padding-left: 40px;
+    background-color: rgb(43, 100, 150);
+    border: 1px solid red;
+}
+
+#second-border {
+    padding-left: 40px;
+    background-color: rgb(43, 100, 150);
+    border: 1px solid rgb(104, 230, 125);
+}
